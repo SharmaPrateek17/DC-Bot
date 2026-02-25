@@ -85,10 +85,75 @@ SESSION_CLOSE_TITLES = [
 ]
 
 # =========================
+# 📅 EVENT SCHEDULE DATA (UK Time)
+# =========================
+
+# Format: (HH:MM, Event Name, Optional Day List)
+# Days: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
+# If days is None, it triggers every day.
+
+EVENT_LIST = [
+    # Store Robbery (Informal Signup) - Every Hour at the top of the hour
+    ("00:00", "Store Robbery (Informal Signup)", None),
+    ("01:00", "Store Robbery (Informal Signup)", None),
+    ("02:00", "Store Robbery (Informal Signup)", None),
+    ("03:00", "Store Robbery (Informal Signup)", None),
+    ("04:00", "Store Robbery (Informal Signup)", None),
+    ("05:00", "Store Robbery (Informal Signup)", None),
+    ("06:00", "Store Robbery (Informal Signup)", None),
+    ("07:00", "Store Robbery (Informal Signup)", None),
+    ("08:00", "Store Robbery (Informal Signup)", None),
+    ("09:00", "Store Robbery (Informal Signup)", None),
+    ("10:00", "Store Robbery (Informal Signup)", None),
+    ("11:00", "Store Robbery (Informal Signup)", None),
+    ("12:00", "Store Robbery (Informal Signup)", None),
+    ("13:00", "Store Robbery (Informal Signup)", None),
+    ("14:00", "Store Robbery (Informal Signup)", None),
+    ("15:00", "Store Robbery (Informal Signup)", None),
+    ("16:00", "Store Robbery (Informal Signup)", None),
+    ("17:00", "Store Robbery (Informal Signup)", None),
+    ("18:00", "Store Robbery (Informal Signup)", None),
+    ("19:00", "Store Robbery (Informal Signup)", None),
+    ("20:00", "Store Robbery (Informal Signup)", None),
+    ("21:00", "Store Robbery (Informal Signup)", None),
+    ("22:00", "Store Robbery (Informal Signup)", None),
+    ("23:00", "Store Robbery (Informal Signup)", None),
+    # Scheduled Daily Events
+    ("01:05", "Business War", None),
+    ("01:10", "Harbor", None),
+    ("02:20", "Hotel Takeover", None),
+    ("03:20", "Weapons Factory", None),
+    ("04:10", "Harbor", None),
+    ("07:10", "Harbor", None),
+    ("07:20", "Weapons Factory", None),
+    ("10:00", "Drug Lab (10:00-23:00)", None),
+    ("10:10", "Harbor", None),
+    ("10:20", "Weapons Factory", None),
+    ("13:10", "Harbor", None),
+    ("14:20", "Foundry", None),
+    ("16:10", "Harbor", None),
+    ("17:15", "Mall (Registration at 17:15, Defense at 17:20, Attack at 17:25)", None),
+    ("19:05", "Business War", None),
+    ("19:10", "Harbor", None),
+    ("20:15", "Vineyard", None),
+    ("20:20", "Attacking Prison", [4]), # Friday Only
+    ("20:20", "King Of Cayo Perico Island", [2, 6]), # Wednesday & Sunday Only
+    ("20:30", "Leftover Components", None),
+    ("20:50", "Rating Battle", None),
+    ("21:30", "Aircraft Carrier", [6]), # Sunday Only
+    ("17:30", "Bank Robbery (Registration at 17:30 for 21:30 event)", [0, 2, 5]), # Mon, Wed, Sat
+    ("22:10", "Harbor", None),
+    ("22:20", "Weapons Factory", None),
+]
+
+# =========================
 # ⚙️ BOT SETUP
 # =========================
 
-IST = pytz.timezone("Asia/Kolkata")
+UK_TZ = pytz.timezone("Europe/London")
+
+GUN_LOSS_EVENTS = ["Business War", "Hotel Takeover", "Rating Battle"]
+NO_GUN_LOSS_EVENTS = ["Harbor", "Foundry", "Mall", "Vineyard", "Weapons Factory"]
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -98,6 +163,7 @@ intents.reactions = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 active_session = False
+current_event_name = "Session"
 participants = {}           # {user_id: slot_number}
 session_start_time = None
 session_message_id = None   # The message users react to
@@ -114,7 +180,7 @@ def make_embed(title, description, color=EMBED_COLOR, fields=None, thumbnail=Non
         title=title,
         description=description,
         color=color,
-        timestamp=datetime.now(IST),
+        timestamp=datetime.now(UK_TZ),
     )
     em.set_footer(text=FOOTER_TEXT)
     if thumbnail:
@@ -145,9 +211,18 @@ def build_live_embed(title_text):
     else:
         registrant_list = "*No one yet… be the first!*"
 
+    # Determine if gun loss applies
+    warning_field = []
+    is_dangerous = any(danger in current_event_name for danger in GUN_LOSS_EVENTS)
+    if is_dangerous:
+        warning_field = [("⚠️ Gear Warning", "You **LOSE** guns/ammo on death in this event (unless you have Prime Platinum).", False)]
+    elif any(safe in current_event_name for safe in NO_GUN_LOSS_EVENTS):
+        warning_field = [("✅ Gear Safe", "You **DO NOT** lose guns/ammo on death in this event.", False)]
+
     em = make_embed(
         title=title_text,
         description=(
+            f"Registration for: **{current_event_name}**\n"
             f"React with {REGISTER_EMOJI} below to **register!**\n"
             f"First **10** members get a slot.\n\n"
             f"```\n[{progress}] {slots_taken}/10 slots claimed\n```\n"
@@ -157,6 +232,7 @@ def build_live_embed(title_text):
             ("🎰 Slots Left", f"**{slots_left}**", True),
             ("⏳ Time Limit", "8 minutes", True),
             ("📍 Status", "🟢 OPEN" if slots_left > 0 else "🔴 FULL", True),
+        ] + warning_field + [
             ("📝 Registered", registrant_list, False),
         ],
     )
@@ -164,44 +240,67 @@ def build_live_embed(title_text):
 
 
 # =========================
-# ⏰ HOURLY CHECK
+# ⏰ EVENT SCHEDULER (Every Minute Check)
 # =========================
+
+async def open_poll(matching_events):
+    """Handle the opening and timed closing of a registration session."""
+    global active_session, participants, session_start_time, session_message_id, current_event_name
+    
+    channel = bot.get_channel(channel_id)
+    if channel is None:
+        return
+    role = channel.guild.get_role(allowed_role_id)
+
+    participants = {}
+    active_session = True
+    current_event_name = " & ".join(matching_events)
+    session_start_time = datetime.now(UK_TZ)
+
+    # Unlock channel for role
+    await channel.set_permissions(role, send_messages=True)
+
+    title = random.choice(SESSION_OPEN_TITLES)
+    em = build_live_embed(title)
+
+    msg = await channel.send(embed=em)
+    session_message_id = msg.id
+
+    # Add the registration reaction for users to click
+    await msg.add_reaction(REGISTER_EMOJI)
+
+    print(f"📢 Poll opened for {current_event_name}! (UK Time: {session_start_time.strftime('%H:%M')})")
+
+    # Wait 8 minutes
+    await asyncio.sleep(480)
+
+    # Only auto-close if this specific session is still the active one
+    if active_session and session_message_id == msg.id:
+        await close_session(channel)
+
+
 @tasks.loop(minutes=1)
-async def hourly_check():
-    global active_session, participants, session_start_time, session_message_id
+async def event_scheduler():
+    global active_session
 
-    now = datetime.now(IST)
+    now = datetime.now(UK_TZ)
+    current_time_str = now.strftime("%H:%M")
+    current_day = now.weekday()
 
-    # Session triggers at the start of every hour
-    if now.minute == 0 and not active_session:
-        channel = bot.get_channel(channel_id)
-        if channel is None:
-            return
-        role = channel.guild.get_role(allowed_role_id)
+    # Find all events right now
+    matching_events = []
+    for time_str, name, days in EVENT_LIST:
+        if time_str == current_time_str:
+            if days is None or current_day in days:
+                matching_events.append(name)
 
-        participants = {}
-        active_session = True
-        session_start_time = now
-
-        # Unlock channel for role
-        await channel.set_permissions(role, send_messages=True)
-
-        title = random.choice(SESSION_OPEN_TITLES)
-        em = build_live_embed(title)
-
-        msg = await channel.send(embed=em)
-        session_message_id = msg.id
-
-        # Add the registration reaction for users to click
-        await msg.add_reaction(REGISTER_EMOJI)
-
-        print(f"📢 Session opened! Message ID: {session_message_id}")
-
-        # Wait 8 minutes
-        await asyncio.sleep(480)
-
-        if active_session:
-            await close_session(channel)
+    if matching_events:
+        if not active_session:
+            # Start the poll in a background task so the scheduler loop can continue
+            asyncio.create_task(open_poll(matching_events))
+        else:
+            event_names = ", ".join(matching_events)
+            print(f"⚠️ Skipping scheduled events ({event_names}) - A session is already active.")
 
 
 # =========================
@@ -266,7 +365,7 @@ async def on_raw_reaction_add(payload):
     except Exception as e:
         print(f"⚠️ Could not update embed: {e}")
 
-    # Send a quick confirmation in channel (auto-deletes after 5s)
+    # Send a quick confirmation in channel (auto-deletes after 15s)
     slots_left = 10 - slot
     confirm_em = make_embed(
         title=f"{emoji}  Slot #{slot} Claimed!",
@@ -277,8 +376,8 @@ async def on_raw_reaction_add(payload):
         ],
     )
     temp_msg = await channel.send(embed=confirm_em)
-    # Auto-delete the confirmation after 5 seconds
-    await asyncio.sleep(5)
+    # Auto-delete the confirmation after 15 seconds
+    await asyncio.sleep(15)
     try:
         await temp_msg.delete()
     except discord.NotFound:
@@ -372,14 +471,14 @@ async def close_session(channel):
 
     elapsed = ""
     if session_start_time:
-        delta = datetime.now(IST) - session_start_time
+        delta = datetime.now(UK_TZ) - session_start_time
         mins = int(delta.total_seconds() // 60)
         secs = int(delta.total_seconds() % 60)
         elapsed = f"{mins}m {secs}s"
 
     em = make_embed(
         title=title,
-        description=f"The session is now **closed**.\n\n**{count}/10** slots were claimed.",
+        description=f"The registration for **{current_event_name}** is now **closed**.\n\n**{count}/10** slots were claimed.",
         color=EMBED_COLOR_CLOSE,
         fields=[
             ("👥 Participants", user_list, False),
@@ -417,12 +516,12 @@ async def close_session(channel):
         summary_text = "No participants."
 
     clean_em = make_embed(
-        title="📋  Session Summary",
+        title=f"📋  {current_event_name} Summary",
         description=(
             f"**{count}** member(s) registered.\n"
             f"Duration: **{elapsed or '—'}**\n\n"
             f"{summary_text}\n\n"
-            "*Next session opens at the top of the next hour.* ⏳"
+            f"*Next event reminder will trigger automatically.* ⏳"
         ),
         color=EMBED_COLOR,
     )
@@ -430,6 +529,7 @@ async def close_session(channel):
 
     session_start_time = None
     session_message_id = None
+    current_event_name = "Session"
 
 
 # ============================================================
@@ -445,9 +545,13 @@ async def help_cmd(ctx):
         description="Here's everything I can do!",
         color=EMBED_COLOR,
         fields=[
-            ("!status", "Check if a session is running, slots left, time remaining.", False),
+            ("!status", "Check if a session is running and see registrations.", False),
+            ("!registrations", "List currently registered participants.", False),
+            ("!events", "Show the full event schedule and gun rules. 📅", False),
             ("!leaderboard", "See the all-time most dedicated members. 🏆", False),
             ("!quote", "Get a random motivational quote to fuel your day. 💬", False),
+            ("!clean [amount]", "Purge messages from the channel (Admin only). 🧹", False),
+            ("!start", "Manually start a registration session (Admin only).", False),
             ("!help", "Show this help message.", False),
         ],
     )
@@ -466,15 +570,27 @@ async def status_cmd(ctx):
         elapsed = ""
         remaining = ""
         if session_start_time:
-            delta = datetime.now(IST) - session_start_time
+            delta = datetime.now(UK_TZ) - session_start_time
             mins_passed = int(delta.total_seconds() // 60)
             secs_passed = int(delta.total_seconds() % 60)
             elapsed = f"{mins_passed}m {secs_passed}s"
             time_left = max(0, 480 - int(delta.total_seconds()))
             remaining = f"{time_left // 60}m {time_left % 60}s"
 
+        if participants:
+            lines = []
+            medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+            for uid, slot in sorted(participants.items(), key=lambda x: x[1]):
+                medal = medals.get(slot, f"**#{slot}**")
+                member = ctx.guild.get_member(uid)
+                name = member.display_name if member else f"User#{uid}"
+                lines.append(f"{medal} **{name}**")
+            registrant_list = "\n".join(lines)
+        else:
+            registrant_list = "*No one yet…*"
+
         em = make_embed(
-            title="🟢  Session is LIVE!",
+            title=f"🟢  {current_event_name} Registration is LIVE!",
             description=(
                 f"```\n[{progress}] {slots_taken}/10 slots claimed\n```\n"
                 f"React with {REGISTER_EMOJI} on the session message to register!"
@@ -484,24 +600,133 @@ async def status_cmd(ctx):
                 ("🎰 Slots Left", f"**{slots_left}**", True),
                 ("⏱️ Elapsed", elapsed or "—", True),
                 ("⏳ Remaining", remaining or "—", True),
+                ("📝 Registered", registrant_list, False),
             ],
         )
     else:
-        now = datetime.now(IST)
-        next_hour = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-        diff = next_hour - now
-        mins = int(diff.total_seconds() // 60)
-
+        now = datetime.now(UK_TZ)
+        time_str = now.strftime("**%H:%M**")
+        
         em = make_embed(
-            title="🔴  No Active Session",
+            title="🔴  No Active Poll",
             description=(
-                f"Next session opens in **~{mins} minutes**.\n"
-                "Hang tight! ⏳"
+                f"Current UK Time: {time_str}\n\n"
+                "Registration polls trigger automatically based on the schedule.\n"
+                "Use `!events` to see the full timetable! ⏳"
             ),
             color=EMBED_COLOR_WARN,
         )
 
     await ctx.reply(embed=em, mention_author=False)
+
+# ---------- !registrations ----------
+@bot.command(name="registrations", aliases=["list", "regs"])
+async def registrations_cmd(ctx):
+    """Show the currently registered participants."""
+    if not active_session:
+        em = make_embed(
+            title="🔴  No Active Session",
+            description="There's no session running right now, so no one is registered.",
+            color=EMBED_COLOR_WARN,
+        )
+        await ctx.reply(embed=em, mention_author=False)
+        return
+
+    if not participants:
+        registrant_list = "*No one has registered yet!*"
+    else:
+        lines = []
+        medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+        for uid, slot in sorted(participants.items(), key=lambda x: x[1]):
+            medal = medals.get(slot, f"**#{slot}**")
+            member = ctx.guild.get_member(uid)
+            name = member.display_name if member else f"User#{uid}"
+            lines.append(f"{medal} **{name}**")
+        registrant_list = "\n".join(lines)
+
+    slots_taken = len(participants)
+    slots_left = 10 - slots_taken
+
+    em = make_embed(
+        title="📝  Current Registrations",
+        description=f"**{slots_taken}/10** slots claimed.\n\n{registrant_list}",
+        color=EMBED_COLOR,
+        fields=[
+            ("🎰 Slots Left", f"**{slots_left}**", True),
+        ]
+    )
+    await ctx.reply(embed=em, mention_author=False)
+
+# ---------- !start ----------
+@bot.command(name="start")
+@commands.has_permissions(administrator=True)
+async def start_cmd(ctx):
+    """Manually start a registration session (Admin only)."""
+    global active_session
+
+    if active_session:
+        await ctx.reply("⚠️ A session is already active!", delete_after=10)
+        return
+
+    # Use the unified open_poll logic
+    asyncio.create_task(open_poll(["Manual Session"]))
+    await ctx.reply(f"✅ Session started in <#{channel_id}>!", delete_after=10)
+
+
+# ---------- !events ----------
+@bot.command(name="events", aliases=["schedule"])
+async def events_cmd(ctx):
+    """Show the full event schedule (UK Time)."""
+    lines = []
+    for time_str, name, days in EVENT_LIST:
+        day_info = ""
+        if days:
+            day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            day_info = f" ({', '.join([day_names[d] for d in days])})"
+        lines.append(f"**{time_str}** — {name}{day_info}")
+    
+    schedule_text = "\n".join(lines)
+    
+    gun_loss_text = ", ".join(GUN_LOSS_EVENTS)
+    no_loss_text = ", ".join(NO_GUN_LOSS_EVENTS)
+    
+    em = make_embed(
+        title="📅  Grand RP Event Schedule (UK Time)",
+        description=(
+            f"Registration polls trigger automatically at these times!\n\n"
+            f"{schedule_text}"
+        ),
+        color=EMBED_COLOR,
+        fields=[
+            ("⚠️ Gun & Ammo Loss", f"You lose gear in: **{gun_loss_text}**.\n*(Note: Gear is safe if you have Prime Platinum)*", False),
+            ("✅ Safe Events", f"You don't lose gear in: **{no_loss_text}**.", False),
+        ]
+    )
+    await ctx.reply(embed=em, mention_author=False)
+
+
+# ---------- !clean ----------
+@bot.command(name="clean", aliases=["purge", "clear"])
+@commands.has_permissions(manage_messages=True)
+async def clean_cmd(ctx, amount: int = 100):
+    """Purge messages from the channel (Admin only)."""
+    # Limit amount to avoid issues
+    amount = min(amount, 500)
+    
+    try:
+        deleted = await ctx.channel.purge(limit=amount + 1) # +1 to include the command itself
+        confirm_em = make_embed(
+            title="🧹  Channel Cleaned!",
+            description=f"Successfully purged **{len(deleted)-1}** messages.",
+            color=EMBED_COLOR_SUCCESS,
+        )
+        temp_msg = await ctx.send(embed=confirm_em)
+        await asyncio.sleep(5)
+        await temp_msg.delete()
+    except discord.Forbidden:
+        await ctx.reply("❌ I don't have permission to manage messages!", delete_after=5)
+    except Exception as e:
+        await ctx.reply(f"⚠️ An error occurred: {e}", delete_after=5)
 
 
 # ---------- !leaderboard ----------
@@ -562,7 +787,9 @@ async def on_command_error(ctx, error):
             color=EMBED_COLOR_CLOSE,
             fields=[
                 ("!help", "Show all commands & how to use them.", False),
-                ("!status", "Check if a session is running, slots left, time remaining.", False),
+                ("!status", "Check if a session is running & see registrations.", False),
+                ("!events", "Show the full event schedule. 📅", False),
+                ("!registrations", "List current participants.", False),
                 ("!leaderboard", "See the all-time most dedicated members. 🏆", False),
                 ("!quote", "Get a random motivational quote. 💬", False),
             ],
@@ -579,8 +806,8 @@ async def on_command_error(ctx, error):
 async def on_ready():
     print(f"✅ Bot is ready! Logged in as {bot.user}")
     print(f"📡 Watching channel {channel_id}")
-    print(f"🔁 Hourly check loop started")
-    hourly_check.start()
+    print(f"🔁 UK Event scheduler loop started")
+    event_scheduler.start()
 
 
 # =========================
