@@ -482,15 +482,15 @@
 
     <!-- Navbar -->
     <nav id="navbar">
-        <div class="logo">SARKAR <span>//</span></div>
+        <div class="logo">SARKAR x BITTU <span>//</span></div>
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#events">Events</a>
             <a href="#leaderboard">Leaderboard</a>
         </div>
-        <div>
-            <a href="#" class="btn">Login</a>
-            <a href="#" class="btn primary">Join Now</a>
+        <div id="auth-buttons">
+            <a href="#" class="btn" onclick="openClerkSignIn(event)">Login</a>
+            <a href="#" class="btn primary" onclick="openClerkSignUp(event)">Join Now</a>
         </div>
     </nav>
 
@@ -501,13 +501,13 @@
             <div class="word"><span class="gsap-text outline">GAMING</span></div>
             <div class="word"><span class="gsap-text">EXPERIENCE.</span></div>
         </div>
-        <p class="hero-p">Welcome to Antigravity x Sarkar. The most advanced Discord gaming community. Sharp edges, editorial aesthetics, and pure performance.</p>
+        <p class="hero-p">Welcome to Sarkar x Bittu. The most advanced Discord gaming community. Sharp edges, editorial aesthetics, and pure performance.</p>
         
         <div class="hero-stats">
-            <div class="stat-item"><span class="stat-num">247K+</span><span class="stat-label">Members</span></div>
-            <div class="stat-item"><span class="stat-num">1.2M</span><span class="stat-label">Messages</span></div>
-            <div class="stat-item"><span class="stat-num">340+</span><span class="stat-label">Events</span></div>
-            <div class="stat-item"><span class="stat-num">$50K</span><span class="stat-label">Prize Pool</span></div>
+            <div class="stat-item"><span class="stat-num" id="stat-members">247K+</span><span class="stat-label">Members</span></div>
+            <div class="stat-item"><span class="stat-num" id="stat-msgs">1.2M</span><span class="stat-label">Messages</span></div>
+            <div class="stat-item"><span class="stat-num" id="stat-events">340+</span><span class="stat-label">Events</span></div>
+            <div class="stat-item"><span class="stat-num" id="stat-prize">$50K</span><span class="stat-label">Prize Pool</span></div>
         </div>
     </section>
 
@@ -727,7 +727,7 @@
     <!-- Join CTA -->
     <section class="join-cta">
         <h2>Ready for deployment?</h2>
-        <a href="#" class="btn primary" style="padding:20px 48px; font-size:16px">AUTHENTICATE NOW</a>
+        <a href="#" class="btn primary" style="padding:20px 48px; font-size:16px" onclick="openClerkSignUp(event)">AUTHENTICATE NOW</a>
     </section>
 
     <!-- Footer -->
@@ -766,7 +766,7 @@
             </div>
         </div>
         <div class="foot-bottom">
-            <div>&copy; 2026 SARKAR / ANTIGRAVITY</div>
+            <div>&copy; 2026 SARKAR x BITTU</div>
             <div>Designed with pure precision.</div>
         </div>
     </footer>
@@ -778,6 +778,57 @@
     
     <script>
         gsap.registerPlugin(ScrollTrigger);
+
+        // Clerk Auth Scripts Placeholder
+        const CLERK_PUBLISHABLE_KEY = "pk_test_cGxhY2Vob2xkZXIuY2xlcmsuYWNjb3VudHMuZGV2JA=="; 
+        
+        async function openClerkSignIn(e) {
+            e.preventDefault();
+            if (window.Clerk) window.Clerk.openSignIn();
+            else alert("Clerk is loading... Make sure your Publishable Key is correct.");
+        }
+        async function openClerkSignUp(e) {
+            e.preventDefault();
+            if (window.Clerk) window.Clerk.openSignUp();
+            else alert("Clerk is loading... Make sure your Publishable Key is correct.");
+        }
+
+        // Load Clerk JS
+        const clerkScript = document.createElement('script');
+        clerkScript.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
+        clerkScript.async = true;
+        clerkScript.src = `https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js`;
+        clerkScript.crossOrigin = 'anonymous';
+        clerkScript.addEventListener('load', async function () {
+            await window.Clerk.load();
+            if (window.Clerk.user) {
+                document.getElementById('auth-buttons').innerHTML = `
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-family:var(--f-mono);font-size:12px;color:var(--neon)">${window.Clerk.user.firstName}</span>
+                        <div id="user-button"></div>
+                    </div>
+                `;
+                window.Clerk.mountUserButton(document.getElementById('user-button'));
+            }
+        });
+        document.body.appendChild(clerkScript);
+
+        // Fetch Live Stats from Backend
+        async function loadLiveStats() {
+            try {
+                const res = await fetch('/api/landing_stats'); 
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('stat-members').innerText = data.members;
+                    document.getElementById('stat-msgs').innerText = data.messages;
+                    document.getElementById('stat-events').innerText = data.events;
+                    document.getElementById('stat-prize').innerText = data.prize_pool;
+                }
+            } catch (err) {
+                console.log("Stats fetch failed (using fallback), ", err);
+            }
+        }
+        loadLiveStats();
 
         // Custom Cursor
         const cursorDot = document.querySelector('.cursor-dot');

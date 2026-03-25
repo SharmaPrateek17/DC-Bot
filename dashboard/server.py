@@ -456,6 +456,21 @@ def api_templates_get():
     with open(path, 'r', encoding='utf-8') as f:
         return jsonify(json.load(f))
 
+@app.route('/api/landing_stats', methods=['GET'])
+def api_landing_stats():
+    guild = _bot.guilds[0] if _bot and _bot.guilds else None
+    active_events = len(_sessions) if _sessions else 0
+    member_count = guild.member_count if guild else 247000
+    
+    resp = jsonify({
+        'members': f"{member_count:,}",
+        'messages': "1.2M",
+        'events': f"{active_events}",
+        'prize_pool': "$50K"
+    })
+    resp.headers.add("Access-Control-Allow-Origin", "*")
+    return resp
+
 # ════════════════════════════════════════════════════════════
 #  BOT ACTION ROUTES
 # ════════════════════════════════════════════════════════════
