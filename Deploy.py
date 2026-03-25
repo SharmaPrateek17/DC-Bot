@@ -14,7 +14,7 @@ try:
     sftp = paramiko.SFTPClient.from_transport(transport)
     print("✅ Connected to Katabump Servers!")
 
-    local_path = "c:/Terrible/Discord/Bot.py"
+    local_path = "c:/Terrible/Discord/sarkar-bot/Bot.py"
     remote_path = "Bot.py"
 
     def print_progress(transferred, total):
@@ -25,7 +25,7 @@ try:
     print("\n✅ Bot.py upload complete!")
 
     # Also upload requirements.txt (wavelink removed)
-    req_local = "c:/Terrible/Discord/requirements.txt"
+    req_local = "c:/Terrible/Discord/sarkar-bot/requirements.txt"
     req_remote = "requirements.txt"
     print(f"📦 Uploading requirements.txt ({os.path.getsize(req_local)} bytes)...")
     sftp.put(req_local, req_remote)
@@ -36,14 +36,14 @@ try:
         sftp.mkdir("config")
     except IOError:
         pass # Directory likely exists
-    config_local = "c:/Terrible/Discord/config/eventGifs.json"
+    config_local = "c:/Terrible/Discord/sarkar-bot/config/eventGifs.json"
     config_remote = "config/eventGifs.json"
     print(f"📦 Uploading eventGifs.json ({os.path.getsize(config_local)} bytes)...")
     sftp.put(config_local, config_remote)
     print("✅ eventGifs.json upload complete!")
 
     # Upload botGifs config
-    bot_config_local = "c:/Terrible/Discord/config/botGifs.json"
+    bot_config_local = "c:/Terrible/Discord/sarkar-bot/config/botGifs.json"
     bot_config_remote = "config/botGifs.json"
     if os.path.exists(bot_config_local):
         print(f"📦 Uploading botGifs.json ({os.path.getsize(bot_config_local)} bytes)...")
@@ -51,7 +51,7 @@ try:
         print("✅ botGifs.json upload complete!")
 
     # Upload annTemplates config
-    ann_config_local = "c:/Terrible/Discord/config/annTemplates.json"
+    ann_config_local = "c:/Terrible/Discord/sarkar-bot/config/annTemplates.json"
     ann_config_remote = "config/annTemplates.json"
     if os.path.exists(ann_config_local):
         print(f"📦 Uploading annTemplates.json ({os.path.getsize(ann_config_local)} bytes)...")
@@ -64,35 +64,35 @@ try:
     except IOError:
         pass  # Directory likely exists
     
-    cog_init_local = "c:/Terrible/Discord/cogs/__init__.py"
+    cog_init_local = "c:/Terrible/Discord/sarkar-bot/cogs/__init__.py"
     cog_init_remote = "cogs/__init__.py"
     if os.path.exists(cog_init_local):
         print(f"📦 Uploading cogs/__init__.py ({os.path.getsize(cog_init_local)} bytes)...")
         sftp.put(cog_init_local, cog_init_remote)
         print("✅ cogs/__init__.py upload complete!")
 
-    ban_cog_local = "c:/Terrible/Discord/cogs/ban_manager.py"
+    ban_cog_local = "c:/Terrible/Discord/sarkar-bot/cogs/ban_manager.py"
     ban_cog_remote = "cogs/ban_manager.py"
     if os.path.exists(ban_cog_local):
         print(f"📦 Uploading cogs/ban_manager.py ({os.path.getsize(ban_cog_local)} bytes)...")
         sftp.put(ban_cog_local, ban_cog_remote)
         print("✅ cogs/ban_manager.py upload complete!")
 
-    cc_cog_local = "c:/Terrible/Discord/cogs/command_center.py"
+    cc_cog_local = "c:/Terrible/Discord/sarkar-bot/cogs/command_center.py"
     cc_cog_remote = "cogs/command_center.py"
     if os.path.exists(cc_cog_local):
         print(f"📦 Uploading cogs/command_center.py ({os.path.getsize(cc_cog_local)} bytes)...")
         sftp.put(cc_cog_local, cc_cog_remote)
         print("✅ cogs/command_center.py upload complete!")
 
-    dc_cog_local = "c:/Terrible/Discord/cogs/deep_clean.py"
+    dc_cog_local = "c:/Terrible/Discord/sarkar-bot/cogs/deep_clean.py"
     dc_cog_remote = "cogs/deep_clean.py"
     if os.path.exists(dc_cog_local):
         print(f"📦 Uploading cogs/deep_clean.py ({os.path.getsize(dc_cog_local)} bytes)...")
         sftp.put(dc_cog_local, dc_cog_remote)
         print("✅ cogs/deep_clean.py upload complete!")
 
-    cp_cog_local = "c:/Terrible/Discord/cogs/clean_panel.py"
+    cp_cog_local = "c:/Terrible/Discord/sarkar-bot/cogs/clean_panel.py"
     cp_cog_remote = "cogs/clean_panel.py"
     if os.path.exists(cp_cog_local):
         print(f"📦 Uploading cogs/clean_panel.py ({os.path.getsize(cp_cog_local)} bytes)...")
@@ -100,7 +100,7 @@ try:
         print("✅ cogs/clean_panel.py upload complete!")
 
     # Upload dashboard folder (Flask web dashboard)
-    dashboard_local = "c:/Terrible/Discord/dashboard"
+    dashboard_local = "c:/Terrible/Discord/sarkar-bot/dashboard"
     if os.path.exists(dashboard_local):
         print("📦 Uploading dashboard/ folder...")
         # Create dashboard directories
