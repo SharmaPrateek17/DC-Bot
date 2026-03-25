@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+{% block title %}About Owner{% endblock %}
+{% block page_title %}About Owner{% endblock %}
+{% block page_sub %}Bittu · Creator & Developer{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(236,72,153,.08));border:1px solid rgba(124,58,237,.3);border-radius:14px;padding:22px;display:flex;gap:20px;margin-bottom:16px;align-items:flex-start">
+  <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#ec4899);display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid rgba(124,58,237,.5);flex-shrink:0">
+    👑
+  </div>
+  <div style="flex:1">
+    <div style="font-size:20px;font-weight:700;color:var(--white);margin-bottom:3px">Bittu</div>
+    <div style="font-size:11px;color:var(--purple-l);font-family:var(--mono);margin-bottom:10px">Creator & Developer · Owner</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;max-width:500px">Creator of the SARKAR Bot and this dashboard. Manages all family operations, event coordination, and bot development. Built the entire system from scratch — the Discord bot, Flask web dashboard, all 20+ API routes, event automation, and moderation tools.</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <span style="background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.25);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:600;font-family:var(--mono)">👑 Owner</span>
+      <span style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:600;font-family:var(--mono)">🛡 Administrator</span>
+      <span style="background:rgba(124,58,237,.12);color:#a78bfa;border:1px solid rgba(124,58,237,.25);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:600;font-family:var(--mono)">🤖 Bot Dev</span>
+      <span style="background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.2);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:600;font-family:var(--mono)">● Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT & LINKS -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+  <a href="https://discord.gg/KY7MkscD" target="_blank" style="text-decoration:none">
+    <div class="panel" style="border:1px solid rgba(88,101,242,.3);cursor:pointer;transition:all .15s">
+      <div class="panel-body" style="text-align:center;padding:20px">
+        <div style="font-size:28px;margin-bottom:8px">🎮</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px">Sarkar Family Server</div>
+        <div style="font-size:10px;color:#7983f5;font-family:var(--mono)">discord.gg/KY7MkscD</div>
+      </div>
+    </div>
+  </a>
+  <a href="https://discord.gg/DNg6fPhY" target="_blank" style="text-decoration:none">
+    <div class="panel" style="border:1px solid rgba(236,72,153,.3);cursor:pointer;transition:all .15s">
+      <div class="panel-body" style="text-align:center;padding:20px">
+        <div style="font-size:28px;margin-bottom:8px">💜</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px">Bittu's Personal Server</div>
+        <div style="font-size:10px;color:#f9a8d4;font-family:var(--mono)">discord.gg/DNg6fPhY</div>
+      </div>
+    </div>
+  </a>
+  <a href="mailto:bittu180712@gmail.com" style="text-decoration:none">
+    <div class="panel" style="border:1px solid rgba(16,185,129,.3);cursor:pointer;transition:all .15s">
+      <div class="panel-body" style="text-align:center;padding:20px">
+        <div style="font-size:28px;margin-bottom:8px">📧</div>
+        <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px">Email Bittu</div>
+        <div style="font-size:10px;color:#34d399;font-family:var(--mono)">bittu180712@gmail.com</div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+  <div class="panel"><div class="panel-h"><div class="panel-title">⚙️ Bot Configuration</div></div><div class="panel-body" style="display:flex;flex-direction:column;gap:0">
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Embed Color</span><span style="font-family:var(--mono);color:#a78bfa">#7C3AED</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Command Prefix</span><span style="font-family:var(--mono)">!</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Footer Text</span><span style="font-size:11px;color:var(--muted)">Event Automation Manager ✦</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Register Emoji</span><span>🎟️</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Timezone</span><span style="font-family:var(--mono)">Europe/London</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--muted)">Quotes API</span><span style="color:var(--green-l);font-size:11px">api.api-ninjas.com</span></div>
+  </div></div>
+  <div class="panel"><div class="panel-h"><div class="panel-title">🔌 Channels Configured</div></div><div class="panel-body" style="display:flex;flex-direction:column;gap:0">
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Pager Channel</span><span style="font-family:var(--mono);color:#fbbf24">#pager</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Ban Log Channel</span><span style="font-family:var(--mono);color:#f87171">#ban-logs</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Special Events Ch</span><span style="font-family:var(--mono);color:#93c5fd">#special-events</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Announcement 1</span><span style="font-family:var(--mono);">#announcement</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px"><span style="color:var(--muted)">Fam Announcement</span><span style="font-family:var(--mono);">#fam-announce</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--muted)">Turf Announcement</span><span style="font-family:var(--mono);">#turf-announce</span></div>
+  </div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{
+    "Admin": {
+        "password_hash": "scrypt:32768:8:1$OpmJHjOLtWDjgJWI$22575e62984bf7f3b8a55f631706ee46724e5f706cd7b7ac7de2830324dd2a76e5eda0dda7ad2a3ebceefaf803cb57464c9e93eca0d50540c1cfc2e7e0bd3180",
+        "first_name": "Boss",
+        "last_name": "Man",
+        "email": "admin@antigravity.com",
+        "discord_tag": "Admin#0001",
+        "avatar_emoji": "😎",
+        "avatar_photo": null,
+        "bio": "",
+        "role": "Owner",
+        "location": "",
+        "timezone": "Europe/London"
+    }
+}

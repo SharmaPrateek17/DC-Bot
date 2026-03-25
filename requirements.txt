@@ -1,3 +1,10 @@
 discord.py>=2.0
 pytz
 python-dotenv
+aiohttp
+PyNaCl
+aiosqlite
+flask
+flask-session
+werkzeug
+requests
