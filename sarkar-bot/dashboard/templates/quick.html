@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block title %}Quick Actions{% endblock %}
+{% block page_title %}Quick Actions{% endblock %}
+{% block page_sub %}One-click bot commands{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="panel"><div class="panel-h"><div class="panel-title">🚨 Family Raid</div></div><div class="panel-body"><div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Sends a FAMILY RAID alert embed to the OTHER_EVENTS channel. Pings @Family role. Use for emergency family gathering.</div><button class="btn btn-danger" style="width:100%;justify-content:center;font-size:13px;padding:12px" onclick="doRaid()">🚨 TRIGGER FAMILY RAID ALERT</button></div></div>
+  <div class="panel"><div class="panel-h"><div class="panel-title">🏪 Store Robbery</div></div><div class="panel-body"><div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Opens a Store Robbery registration session (max 25 members) in the OTHER_EVENTS channel.</div><button class="btn btn-primary" style="width:100%;justify-content:center;font-size:13px;padding:12px" onclick="doRobbery()">🏪 OPEN STORE ROBBERY SESSION</button></div></div>
+  <div class="panel"><div class="panel-h"><div class="panel-title">💬 Send Motivational Quote</div></div><div class="panel-body"><div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Fetches a random quote from API Ninjas or uses local quotes list. Sends as an embed in the channel used when !quote is called.</div><button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:13px;padding:12px" onclick="showToast('ℹ️ Use !quote in Discord to send quotes via bot')">💬 Send Quote (Use !quote in Discord)</button></div></div>
+  <div class="panel"><div class="panel-h"><div class="panel-title">🧹 Auto-Clean Status</div></div><div class="panel-body"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6">The bot auto-purges all event channels every 24 hours. This runs automatically.</div><div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--green-l)">● Auto-clean is ACTIVE — runs every 24h after bot start</div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doRaid(){
+  if(!confirm('Send FAMILY RAID alert to OTHER_EVENTS channel?')) return;
+  const r = await fetch('/api/raid',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  showToast(d.ok?'🚨 RAID ALERT SENT!':'❌ Failed — check bot is running', !d.ok);
+}
+async function doRobbery(){
+  if(!confirm('Open a Store Robbery session in OTHER_EVENTS channel?')) return;
+  const r = await fetch('/api/robbery',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const d = await r.json();
+  showToast(d.ok?'✅ Store Robbery session opened!':'❌ Failed — session may already be active', !d.ok);
+}
+</script>
+{% endblock %}

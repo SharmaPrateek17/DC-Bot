@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SARKAR — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg0:#0d0e10;--bg1:#141517;--bg2:#1a1b1e;--bg3:#222428;--purple:#7C3AED;--purple-l:#a78bfa;--green:#10b981;--green-l:#34d399;--red:#ef4444;--amber:#f59e0b;--text:#e2e8f0;--muted:#6b7280;--white:#f8fafc;--font:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace}
+html,body{min-height:100vh;background:var(--bg0);color:var(--text);font-family:var(--font);padding:20px;position:relative;overflow-y:auto}
+.wrapper {display:flex;flex-direction:column;align-items:center;min-height:min-content;padding-top:10vh;padding-bottom:10vh;}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(124,58,237,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.bg-glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.1) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:24px;z-index:2;position:relative}
+.logo-av{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#7C3AED,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(124,58,237,.4)}
+.logo-name{font-size:22px;font-weight:700;color:var(--white)}
+.auth-tabs{display:flex;gap:0;background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:4px;margin-bottom:20px;z-index:2;position:relative}
+.auth-tab{padding:8px 30px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;user-select:none}
+.auth-tab.active{background:var(--purple);color:#fff;box-shadow:0 2px 12px rgba(124,58,237,.4)}
+.card{background:var(--bg1);border:1px solid rgba(255,255,255,.07);border-radius:16px;width:390px;padding:28px;z-index:2;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.card-title{font-size:18px;font-weight:700;color:var(--white);margin-bottom:4px;text-align:center}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:22px;text-align:center}
+.social-btn{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;transition:all .15s;width:100%;margin-bottom:8px;background:transparent}
+.sb-discord{border-color:rgba(88,101,242,.4);color:#7983f5}
+.sb-discord:hover{background:rgba(88,101,242,.12)}
+.sb-google{border-color:rgba(255,255,255,.12);color:var(--text)}
+.sb-google:hover{background:rgba(255,255,255,.07)}
+.sb-icon{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0}
+.div-line{flex:1;height:1px;background:rgba(255,255,255,.07)}
+.div-text{font-size:10px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+.field{margin-bottom:13px}
+.field-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:5px}
+.field-wrap{position:relative}
+.field-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.field-input{width:100%;background:var(--bg0);border:1.5px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px 10px 36px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;transition:border-color .15s}
+.field-input:focus{border-color:var(--purple)}
+.field-input::placeholder{color:var(--muted)}
+.field-input.noi{padding-left:12px}
+.toggle-pw{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:13px;color:var(--muted);background:none;border:none}
+.strength-bar{height:3px;border-radius:2px;margin-top:5px;transition:all .3s;background:rgba(255,255,255,.07)}
+.strength-lbl{font-size:9px;font-family:var(--mono);margin-top:3px;min-height:13px}
+.btn-submit{width:100%;padding:12px;border-radius:9px;background:var(--purple);color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;margin-top:6px;box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.btn-submit:hover{background:#6d28d9;transform:translateY(-1px)}
+.btn-submit:active{transform:translateY(0)}
+.form-footer{text-align:center;margin-top:13px;font-size:11px;color:var(--muted)}
+.form-footer a{color:var(--purple-l);cursor:pointer;text-decoration:none}
+.form-footer a:hover{text-decoration:underline}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.av-picker{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.av-circle{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#ec4899);display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid rgba(124,58,237,.4);flex-shrink:0;cursor:pointer}
+.av-emojis{display:flex;gap:5px;flex-wrap:wrap}
+.av-em{font-size:20px;cursor:pointer;padding:3px;border-radius:5px;transition:background .12s}
+.av-em:hover,.av-em.sel{background:rgba(124,58,237,.2)}
+.err-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:7px;padding:8px 12px;font-size:11px;color:var(--red-l);margin-bottom:12px;display:none}
+.remember-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:11px;color:var(--muted)}
+.remember-row label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.remember-row input{accent-color:var(--purple)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="wrapper">
+<div class="logo-row">
+  <div class="logo-av">⚡</div>
+  <div class="logo-name">SARKAR Dashboard</div>
+</div>
+<div class="auth-tabs">
+  <div class="auth-tab active" id="tab-in"  onclick="showTab('login')">Sign In</div>
+  <div class="auth-tab"        id="tab-reg" onclick="showTab('register')">Create Account</div>
+</div>
+
+<!-- LOGIN -->
+<div class="card" id="card-login">
+  <div class="card-title">Welcome back 👋</div>
+  <div class="card-sub">Sign in to your SARKAR dashboard</div>
+  <div class="err-msg" id="loginErr"></div>
+  <div style="display:none;">
+    <a href="/login/discord" style="text-decoration:none">
+      <button type="button" class="social-btn sb-discord"><div class="sb-icon">🎮</div>Continue with Discord</button>
+    </a>
+  </div>
+  <div class="divider"><div class="div-line"></div><div class="div-text">or use username</div><div class="div-line"></div></div>
+  <div class="field">
+    <label class="field-label">Username</label>
+    <div class="field-wrap"><span class="field-icon">👤</span><input class="field-input" id="loginUser" placeholder="Your username" autocomplete="username"/></div>
+  </div>
+  <div class="field">
+    <label class="field-label">Password</label>
+    <div class="field-wrap"><span class="field-icon">🔒</span><input class="field-input" type="password" id="loginPass" placeholder="Your password" autocomplete="current-password"/><button class="toggle-pw" onclick="togglePw('loginPass',this)" type="button">👁</button></div>
+  </div>
+  <div class="remember-row">
+    <label><input type="checkbox" id="rememberMe"/>Remember me</label>
+    <span style="color:var(--purple-l);cursor:pointer">Forgot password?</span>
+  </div>
+  <button class="btn-submit" onclick="doLogin()">Sign In →</button>
+  <div class="form-footer">No account? <a onclick="showTab('register')">Create one free</a></div>
+</div>
+
+<!-- REGISTER -->
+<div class="card" id="card-register" style="display:none">
+  <div class="card-title">Create Account</div>
+  <div class="card-sub">Set up your SARKAR dashboard profile</div>
+  <div class="err-msg" id="regErr"></div>
+  <div class="av-picker">
+    <div class="av-circle" id="avCircle" onclick="cycleAv()">😎</div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:5px">Pick an avatar</div>
+      <div class="av-emojis">
+        <span class="av-em sel" onclick="pickAv(this,'😎')">😎</span>
+        <span class="av-em" onclick="pickAv(this,'👑')">👑</span>
+        <span class="av-em" onclick="pickAv(this,'🔥')">🔥</span>
+        <span class="av-em" onclick="pickAv(this,'⚡')">⚡</span>
+        <span class="av-em" onclick="pickAv(this,'🎯')">🎯</span>
+        <span class="av-em" onclick="pickAv(this,'🦅')">🦅</span>
+        <span class="av-em" onclick="pickAv(this,'💎')">💎</span>
+        <span class="av-em" onclick="pickAv(this,'🏆')">🏆</span>
+      </div>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="field-label">First Name</label><input class="field-input noi" id="regFirst" placeholder="First name"/></div>
+    <div class="field"><label class="field-label">Last Name</label><input class="field-input noi" id="regLast" placeholder="Last name"/></div>
+  </div>
+  <div class="field">
+    <label class="field-label">Username <span style="color:var(--red-l)">*</span></label>
+    <div class="field-wrap"><span class="field-icon">👤</span><input class="field-input" id="regUser" placeholder="e.g. SarkarBoss" oninput="checkUser(this.value)" autocomplete="username"/></div>
+    <div style="font-size:9px;margin-top:4px;min-height:13px" id="userCheck"></div>
+  </div>
+  <div class="field">
+    <label class="field-label">Discord Tag (optional)</label>
+    <div class="field-wrap"><span class="field-icon">🎮</span><input class="field-input" id="regDiscord" placeholder="YourName#0000"/></div>
+  </div>
+  <div class="field">
+    <label class="field-label">Email (optional)</label>
+    <div class="field-wrap"><span class="field-icon">📧</span><input class="field-input" id="regEmail" type="email" placeholder="your@email.com"/></div>
+  </div>
+  <div class="field">
+    <label class="field-label">Password <span style="color:var(--red-l)">*</span></label>
+    <div class="field-wrap"><span class="field-icon">🔒</span><input class="field-input" type="password" id="regPass" placeholder="Create a strong password" oninput="checkStrength(this.value)" autocomplete="new-password"/><button class="toggle-pw" onclick="togglePw('regPass',this)" type="button">👁</button></div>
+    <div class="strength-bar" id="sBar"></div>
+    <div class="strength-lbl" id="sLbl"></div>
+  </div>
+  <button class="btn-submit" onclick="doRegister()">Create Account →</button>
+  <div class="form-footer">Already have an account? <a onclick="showTab('login')">Sign in</a></div>
+</div>
+
+<script>
+let selEmoji = '😎';
+const avList  = ['😎','👑','🔥','⚡','🎯','🦅','💎','🏆','🐉','🌟'];
+let avIdx = 0;
+function cycleAv(){ avIdx=(avIdx+1)%avList.length; selEmoji=avList[avIdx]; document.getElementById('avCircle').textContent=selEmoji; document.querySelectorAll('.av-em').forEach(e=>e.classList.remove('sel')); }
+function pickAv(el,em){ selEmoji=em; document.getElementById('avCircle').textContent=em; document.querySelectorAll('.av-em').forEach(e=>e.classList.remove('sel')); el.classList.add('sel'); }
+function showTab(t){
+  document.getElementById('card-login').style.display = t==='login'?'':'none';
+  document.getElementById('card-register').style.display = t==='register'?'':'none';
+  document.getElementById('tab-in').className  = 'auth-tab'+(t==='login'?' active':'');
+  document.getElementById('tab-reg').className = 'auth-tab'+(t==='register'?' active':'');
+}
+function togglePw(id,btn){ const f=document.getElementById(id); f.type=f.type==='password'?'text':'password'; btn.textContent=f.type==='password'?'👁':'🙈'; }
+function checkStrength(v){
+  const bar=document.getElementById('sBar'),lbl=document.getElementById('sLbl');
+  if(!v){bar.style.width='0';lbl.textContent='';return;}
+  let s=0; if(v.length>=8)s++; if(/[A-Z]/.test(v))s++; if(/[0-9]/.test(v))s++; if(/[^A-Za-z0-9]/.test(v))s++;
+  const cfg=[[25,'#ef4444','Weak'],[50,'#f59e0b','Fair'],[75,'#3b82f6','Good'],[100,'#10b981','Strong']];
+  const [w,c,t]=cfg[Math.min(s,4)-1]||cfg[0];
+  bar.style.width=w+'%'; bar.style.background=c; lbl.style.color=c; lbl.textContent=t;
+}
+function checkUser(v){
+  const el=document.getElementById('userCheck');
+  if(!v){el.textContent='';return;}
+  if(v.length<3){el.style.color='#f87171';el.textContent='⚠ Min 3 characters';return;}
+  el.style.color='#34d399'; el.textContent='✓ Looks good';
+}
+function showErr(id, msg){ const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+function hideErr(id){ document.getElementById(id).style.display='none'; }
+function notifyOAuth(p){ alert(`${p} OAuth:\nAdd CLIENT_ID and CLIENT_SECRET to your .env file\nand configure the OAuth callback route in server.py.\nSee the code plan for full instructions.`); }
+
+async function doLogin(){
+  hideErr('loginErr');
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!p){ showErr('loginErr','Please fill in username and password'); return; }
+  const btn=document.querySelector('#card-login .btn-submit');
+  btn.textContent='Signing in...'; btn.disabled=true;
+  try {
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(d.ok){ window.location.href='/'; }
+    else { showErr('loginErr', '❌ ' + (d.error||'Login failed')); btn.textContent='Sign In →'; btn.disabled=false; }
+  } catch(e){ showErr('loginErr','Connection error. Is the bot running?'); btn.textContent='Sign In →'; btn.disabled=false; }
+}
+
+async function doRegister(){
+  hideErr('regErr');
+  const u=document.getElementById('regUser').value.trim();
+  const p=document.getElementById('regPass').value;
+  if(!u||!p){ showErr('regErr','Username and password are required'); return; }
+  if(p.length<6){ showErr('regErr','Password must be at least 6 characters'); return; }
+  const btn=document.querySelector('#card-register .btn-submit');
+  btn.textContent='Creating...'; btn.disabled=true;
+  try {
+    const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p,first_name:document.getElementById('regFirst').value,last_name:document.getElementById('regLast').value,email:document.getElementById('regEmail').value,discord_tag:document.getElementById('regDiscord').value,avatar_emoji:selEmoji})});
+    const d=await r.json();
+    if(d.ok){ window.location.href='/'; }
+    else { showErr('regErr','❌ ' + (d.message||'Registration failed')); btn.textContent='Create Account →'; btn.disabled=false; }
+  } catch(e){ showErr('regErr','Connection error'); btn.textContent='Create Account →'; btn.disabled=false; }
+}
+document.addEventListener('keypress', e=>{ if(e.key==='Enter'){ const card=document.getElementById('card-login').style.display!=='none'?'login':'register'; card==='login'?doLogin():doRegister(); } });
+</script>
+</div>
+</body>
+</html>
