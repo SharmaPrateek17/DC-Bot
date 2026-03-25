@@ -260,6 +260,10 @@ def logout():
 # ════════════════════════════════════════════════════════════
 
 @app.route('/')
+def landing_page():
+    return render_template('index.html')
+
+@app.route('/dashboard')
 @login_required
 def home():
     return render_template('home.html', user=get_current_user(), active='home')
