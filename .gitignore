@@ -5,22 +5,7 @@ env/
 
 # Environment variables (contains your token!)
 .env
-
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-*.pyo
-
-# IDE
-.vscode/
-# Virtual environment
-.venv/
-venv/
-env/
-
-# Environment variables (contains your token!)
-.env
+.env.vercel
 
 # Python cache
 __pycache__/
@@ -36,5 +21,24 @@ __pycache__/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Node
 node_modules/
 .next/
+
+# Clerk
+/.clerk/
+
+# Vercel
+.vercel
+vercel.log
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Logs
+*.log
+build_log.txt
+dev_logs.txt
+dev_logs2.txt
+git_status.txt
