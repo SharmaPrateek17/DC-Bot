@@ -2,6 +2,11 @@
   "name": "website-next",
   "version": "0.1.0",
   "private": true,
+  "antigravity": {
+    "plugins": [
+      "./opencode-ag-auth/dist"
+    ]
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
