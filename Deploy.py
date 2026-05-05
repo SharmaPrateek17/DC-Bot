@@ -24,6 +24,14 @@ try:
     sftp.put(local_path, remote_path, callback=print_progress)
     print("\n✅ Bot.py upload complete!")
 
+    # Upload .env file (contains DISCORD_TOKEN)
+    env_local = "c:/Terrible/Discord/sarkar-bot/../.env"
+    env_remote = ".env"
+    if os.path.exists(env_local):
+        print(f"📦 Uploading .env ({os.path.getsize(env_local)} bytes)...")
+        sftp.put(env_local, env_remote)
+        print("✅ .env upload complete!")
+
     # Also upload requirements.txt (wavelink removed)
     req_local = "c:/Terrible/Discord/sarkar-bot/requirements.txt"
     req_remote = "requirements.txt"
