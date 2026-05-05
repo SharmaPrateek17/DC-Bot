@@ -4,7 +4,7 @@ import time
 
 host = "sftp.fr-node-54.katabump.com"
 port = 2022
-username = "304a797143d5c79.5adca8a7"
+username = "304a797143d5c79.549fc3c6"
 password = "2cec2ab0da7e"
 
 print(f"🔄 Connecting to Katabump SFTP ({host}:{port})...")
